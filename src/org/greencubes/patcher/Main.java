@@ -122,13 +122,13 @@ public class Main {
 			}
 			File target = new File(fo.optString("target"));
 			try {
-				Util.touch(target);
+				Util.canReplaceFile(target);
 			} catch(IOException e) {
 				try {
 					Util.sleepForReal(1000); // Wait one more second and try again
 				} catch(InterruptedException e1) {}
 				try {
-					Util.touch(target);
+					Util.canReplaceFile(target);
 				} catch(IOException e2) {
 					error(I18n.get("patch-error"), I18n.get("error-no", 4), e2);
 					return;

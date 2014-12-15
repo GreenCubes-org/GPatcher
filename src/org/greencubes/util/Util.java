@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class Util {
+	
+	private static final Random random = new Random();
 	
 	public static void close(Closeable... r) {
 		for(int i = 0; i < r.length; ++i)
@@ -134,12 +137,17 @@ public class Util {
 	 * @throws IOException if file is not writeable
 	 * @author thnks for idea to Apache Commons IO
 	 */
-	public static void touch(File file) throws IOException {
+	public static void canReplaceFile(File file) throws IOException {
 		if(!file.exists()) {
 			FileOutputStream out = new FileOutputStream(file);
 			close(out);
 		}
-		file.setLastModified(System.currentTimeMillis());
+		File f = getUniqueTmpFile(file.getParentFile());
+		if(!file.renameTo(f)) {
+			throw new IOException("Can not rename file");
+		} else {
+			f.renameTo(file);
+		}
 	}
 	
 	public static void sleepForReal(long time) throws InterruptedException {
@@ -150,5 +158,19 @@ public class Util {
 				return;
 			Thread.sleep(end - now);
 		}
+	}
+	
+	private static File getUniqueTmpFile(File dir) {
+		File f = null;
+		do {
+			long l = random.nextLong();
+			if(l == Long.MIN_VALUE) {
+				l = 0;
+			} else {
+				l = Math.abs(l);
+			}
+			f = new File(dir, "tmp-" + l + ".tmp");
+		} while(f.exists());
+		return f;
 	}
 }
