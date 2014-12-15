@@ -131,11 +131,11 @@ public class Util {
 	}
 	
 	/**
-	 * Performs touch operations: opens file for writing and
-	 * closing it modifying last edited time.
-	 * @param file to perform touch operation
-	 * @throws IOException if file is not writeable
-	 * @author thnks for idea to Apache Commons IO
+	 * Check that this file can be replaced by another with
+	 * rename (move) operation or can be created
+	 * @param file to check
+	 * @throws IOException if file is owned by another process/thread
+	 * or no permissions to perform operation
 	 */
 	public static void canReplaceFile(File file) throws IOException {
 		if(!file.exists()) {
