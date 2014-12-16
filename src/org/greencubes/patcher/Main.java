@@ -188,6 +188,12 @@ public class Main {
 		} catch(IllegalThreadStateException ex) {
 			// Process is still running - its fine
 		}
+		String patchDir = patchFile.optString("patchdir");
+		if(patchDir != null) {
+			File pd = new File(patchDir);
+			if(pd.exists())
+				Util.deleteDirectory(pd);
+		}
 		System.exit(0);
 	}
 	
@@ -205,6 +211,7 @@ public class Main {
 	}
 	
 	public static void error(String title, String message, Throwable exception) {
-		throw (RuntimeException) new RuntimeException(title + "\n" + message).initCause(exception); // TODO : Add UI
+		// TODO : Add UI
+		throw (RuntimeException) new RuntimeException(title + "\n" + message).initCause(exception);
 	}
 }

@@ -141,11 +141,10 @@ public class Util {
 		if(!file.exists()) {
 			FileOutputStream out = new FileOutputStream(file);
 			close(out);
-		}
-		File f = getUniqueTmpFile(file.getParentFile());
-		if(!file.renameTo(f)) {
-			throw new IOException("Can not rename file");
 		} else {
+			File f = getUniqueTmpFile(file.getParentFile());
+			if(!file.renameTo(f))
+				throw new IOException("Can not rename file");
 			f.renameTo(file);
 		}
 	}
@@ -164,13 +163,25 @@ public class Util {
 		File f = null;
 		do {
 			long l = random.nextLong();
-			if(l == Long.MIN_VALUE) {
+			if(l == Long.MIN_VALUE)
 				l = 0;
-			} else {
+			else
 				l = Math.abs(l);
-			}
 			f = new File(dir, "tmp-" + l + ".tmp");
 		} while(f.exists());
 		return f;
+	}
+	
+	public static boolean deleteDirectory(File path) {
+		if(path.exists()) {
+			File[] files = path.listFiles();
+			for(int i = 0; i < files.length; i++) {
+				if(files[i].isDirectory())
+					deleteDirectory(files[i]);
+				else
+					files[i].delete();
+			}
+		}
+		return path.delete();
 	}
 }
