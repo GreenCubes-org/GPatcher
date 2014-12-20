@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
@@ -29,9 +30,12 @@ public class Main {
 	
 	private static boolean silent = true;
 	private static JFrame frame = null;
-	private static JTextPane statusPane = null;
+	private static JLabel statusPane = null;
 	
 	public static void main(String[] args) {
+		System.setProperty("awt.useSystemAAFontSettings","on");
+		System.setProperty("swing.aatext", "true");
+		System.setProperty("java.net.preferIPv4Stack", "true");
 		if(args.length < 1)
 			throw new IllegalArgumentException("You must specify path to patch file");
 		JSONObject patchFile = null;
@@ -69,25 +73,22 @@ public class Main {
 				SwingUtilities.invokeAndWait(new Runnable() {
 					@Override
 					public void run() {
-						container.add(new JTextPane() {{
+						container.add(new JLabel() {{
 							setText(I18n.get("title"));
 							setOpaque(false);
 							setBackground(new Color(0, 0, 0, 0));
 							setForeground(new Color(236, 255, 255, 255));
-							setEditable(false);
 							setFont(new Font("Dialog", Font.BOLD, 20));
 							disableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
-							setHighlighter(null);
+							setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 						}});
-						container.add(statusPane = new JTextPane() {{
-							setText("cat");
+						container.add(statusPane = new JLabel() {{
 							setOpaque(false);
 							setBackground(new Color(0, 0, 0, 0));
 							setForeground(new Color(236, 255, 255, 255));
-							setEditable(false);
 							setFont(new Font("Dialog", Font.PLAIN, 14));
 							disableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
-							setHighlighter(null);
+							setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 						}});
 						frame.revalidate();
 					}
