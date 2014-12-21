@@ -4,25 +4,24 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
 import org.greencubes.util.I18n;
 import org.greencubes.util.Util;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -43,18 +42,25 @@ public class Main {
 		try {
 			fr = new FileReader(args[0]);
 			patchFile = new JSONObject(new JSONTokener(fr));
-		} catch(FileNotFoundException e) {
-			error("File '" + args[0] + "' not found!", "", null);
-			return;
-		} catch(JSONException e) {
-			error("File '" + args[0] + "' is not JSON file", "", e);
+		} catch(Exception e) {
+			error("Unable to read patch file '" + args[0] + "'!", "", e);
 			return;
 		} finally {
 			Util.close(fr);
 		}
 		silent = patchFile.optBoolean("silent", silent);
 		if(!silent) {
+			ArrayList<BufferedImage> icons = new ArrayList<BufferedImage>();
+			try {
+				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico32x32.png")));
+				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico48x48.png")));
+				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico64x64.png")));
+				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico128x128.png")));
+				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico256x256.png")));
+			} catch(IOException e) {}
+			
 			frame = new JFrame("Patcher");
+			frame.setIconImages(icons);
 			frame.setUndecorated(true);
 			frame.setMinimumSize(new Dimension(300, 80));
 			frame.setMaximumSize(new Dimension(300, 80));
@@ -102,6 +108,7 @@ public class Main {
 			error(I18n.get("patch-error"), I18n.get("error-no", 1), null);
 			return;
 		}
+		System.out.println("[SIG] LOADED");
 		long waitTime = patchFile.optLong("delay", 1000);
 		if(waitTime > 0) {
 			setStatus(I18n.get("waiting"));
@@ -153,6 +160,20 @@ public class Main {
 			source.renameTo(target);
 		}
 		setStatus(I18n.get("starting"));
+		if(!startProcess(patchFile))
+			return;
+		
+		String patchDir = patchFile.optString("patchdir");
+		if(patchDir != null) {
+			File pd = new File(patchDir);
+			if(pd.exists())
+				Util.deleteDirectory(pd);
+		}
+		System.exit(0);
+		System.out.println("[SIG] END");
+	}
+	
+	private static boolean startProcess(JSONObject patchFile) {
 		JSONArray execArray = patchFile.optJSONArray("exec");
 		if(execArray == null || execArray.length() == 0)
 			System.exit(0);
@@ -172,7 +193,7 @@ public class Main {
 				process = pb.start();
 			} catch(Exception e2) {
 				error(I18n.get("patch-error"), I18n.get("error-no", 6), e2);
-				return;
+				return false;
 			}
 		}
 		// Wait few seconds and check that everyting is OK
@@ -184,18 +205,12 @@ public class Main {
 			int exitValue = process.exitValue();
 			if(exitValue != 0) {
 				error(I18n.get("patch-error"), patchFile.optString("onerror", I18n.get("launch-error")), null);
-				return;
+				return false;
 			}
 		} catch(IllegalThreadStateException ex) {
 			// Process is still running - its fine
 		}
-		String patchDir = patchFile.optString("patchdir");
-		if(patchDir != null) {
-			File pd = new File(patchDir);
-			if(pd.exists())
-				Util.deleteDirectory(pd);
-		}
-		System.exit(0);
+		return true;
 	}
 	
 	public static void setStatus(final String status) {
@@ -212,6 +227,7 @@ public class Main {
 	}
 	
 	public static void error(String title, String message, Throwable exception) {
+		System.out.println("[SIG] ERROR");
 		// TODO : Add UI
 		throw (RuntimeException) new RuntimeException(title + "\n" + message).initCause(exception);
 	}
