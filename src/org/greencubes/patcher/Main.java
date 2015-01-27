@@ -38,9 +38,10 @@ public class Main {
 		if(args.length < 1)
 			throw new IllegalArgumentException("You must specify path to patch file");
 		JSONObject patchFile = null;
+		File patchF = new File(args[0]);
 		FileReader fr = null;
 		try {
-			fr = new FileReader(args[0]);
+			fr = new FileReader(patchF);
 			patchFile = new JSONObject(new JSONTokener(fr));
 		} catch(Exception e) {
 			error("Unable to read patch file '" + args[0] + "'!", "", e);
@@ -48,6 +49,7 @@ public class Main {
 		} finally {
 			Util.close(fr);
 		}
+		
 		silent = patchFile.optBoolean("silent", silent);
 		if(!silent) {
 			ArrayList<BufferedImage> icons = new ArrayList<BufferedImage>();
@@ -58,7 +60,6 @@ public class Main {
 				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico128x128.png")));
 				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico256x256.png")));
 			} catch(IOException e) {}
-			
 			frame = new JFrame("Patcher");
 			frame.setIconImages(icons);
 			frame.setUndecorated(true);
@@ -103,6 +104,7 @@ public class Main {
 				error(e.getLocalizedMessage(), "", e);
 			}
 		}
+		
 		JSONArray patchFiles = patchFile.optJSONArray("files");
 		if(patchFiles == null) {
 			error(I18n.get("patch-error"), I18n.get("error-no", 1), null);
@@ -116,6 +118,7 @@ public class Main {
 				Util.sleepForReal(waitTime);
 			} catch(InterruptedException e) {}
 		}
+		
 		setStatus(I18n.get("checking"));
 		for(int i = 0; i < patchFiles.length(); ++i) {
 			JSONObject fo = patchFiles.optJSONObject(0);
@@ -143,6 +146,7 @@ public class Main {
 				}
 			}
 		}
+		
 		setStatus(I18n.get("updating-files"));
 		for(int i = 0; i < patchFiles.length(); ++i) {
 			JSONObject fo = patchFiles.optJSONObject(0);
@@ -159,6 +163,7 @@ public class Main {
 			}
 			source.renameTo(target);
 		}
+		
 		setStatus(I18n.get("starting"));
 		if(!startProcess(patchFile))
 			return;
@@ -169,8 +174,9 @@ public class Main {
 			if(pd.exists())
 				Util.deleteDirectory(pd);
 		}
-		System.exit(0);
+		patchF.delete();
 		System.out.println("[SIG] END");
+		System.exit(0);
 	}
 	
 	private static boolean startProcess(JSONObject patchFile) {
