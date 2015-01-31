@@ -63,13 +63,11 @@ public class Main {
 			frame = new JFrame("Patcher");
 			frame.setIconImages(icons);
 			frame.setUndecorated(true);
-			frame.setMinimumSize(new Dimension(300, 80));
-			frame.setMaximumSize(new Dimension(300, 80));
 			final JPanel container;
 			frame.add(container = new JPanel() {{
-				Dimension d = new Dimension(300, 80);
+				Dimension d = new Dimension(400, 100);
 				setPreferredSize(d);
-				setBackground(new Color(71, 87, 85, 255));
+				setBackground(new Color(11, 24, 24, 255));
 				setBorder(BorderFactory.createLineBorder(new Color(35, 61, 58, 255), 1));
 				setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 			}});
