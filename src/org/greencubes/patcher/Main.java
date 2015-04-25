@@ -20,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.greencubes.util.I18n;
+import org.greencubes.util.MacOSX;
+import org.greencubes.util.OperatingSystem;
 import org.greencubes.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -59,6 +61,10 @@ public class Main {
 				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico128x128.png")));
 				icons.add(ImageIO.read(Main.class.getResource("/res/icons/gcico256x256.png")));
 			} catch(IOException e) {}
+			if(OperatingSystem.getCurrentPlatform() == OperatingSystem.OSX) {
+				MacOSX.setIcons(icons);
+				MacOSX.setTitle("Patcher");
+			}
 			frame = new JFrame("Patcher");
 			frame.setIconImages(icons);
 			frame.setUndecorated(true);
